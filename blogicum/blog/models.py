@@ -1,10 +1,11 @@
 import datetime
 
-from core.models import PublishedModel
 from django.contrib.auth import get_user_model
 from django.db import models
 from django.db.models.query import QuerySet
 from django.urls import reverse
+
+from core.models import PublishedModel
 
 User = get_user_model()
 

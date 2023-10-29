@@ -17,7 +17,7 @@ urlpatterns = [
         name='category_posts',
     ),
     path(
-        'profile/<str:username>/',
+        'profile/<slug:username>/',
         views.ProfileListView.as_view(),
         name='profile',
     ),

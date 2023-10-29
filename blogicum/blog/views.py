@@ -1,4 +1,4 @@
-import datetime
+# import datetime
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Count
@@ -32,10 +32,6 @@ class CategoryListView(ListView):
     template_name = 'blog/category.html'
 
     def get_context_data(self, **kwargs):
-        # context = super().get_context_data(*args, **kwargs)
-        # slug = get_object_or_404(Category, slug=self.kwargs['category_slug'])
-        # context['category'] = slug
-        # return context
         return dict(
             **super().get_context_data(**kwargs),
             category=get_object_or_404(
@@ -51,11 +47,7 @@ class CategoryListView(ListView):
                 slug=self.kwargs['category_slug'],
             )
         )
-
-        return category.posts(manager='active_objects').filter(
-            is_published=True,
-            pub_date__lte=datetime.datetime.now(),
-        ).order_by('-pub_date').annotate(comment_count=Count('comments'))
+        return category.posts(manager='active_objects').order_by('-pub_date')
 
 
 class PostCreateView(LoginRequiredMixin, SuccessUrlProfile, CreateView):
@@ -81,16 +73,13 @@ class ProfileListView(ListView):
 
     def get_queryset(self):
         self.user = get_object_or_404(User, username=self.kwargs['username'])
+        posts = self.user.posts
         if self.user == self.request.user:
-            return Post.objects.select_related(
-                'category',
-                'location',
-                'author',
-            ).filter(
-                author=self.user
-            ).annotate(comment_count=Count('comments')).order_by('-pub_date')
-        return Post.active_objects.filter(author=self.user).order_by(
-            '-pub_date',
+            posts = posts.filter(author=self.user)
+        else:
+            posts = posts.all()
+        return posts.order_by('-pub_date').annotate(
+            comment_count=Count('comments'),
         )
 
     def get_context_data(self, **kwargs):
