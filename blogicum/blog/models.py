@@ -15,7 +15,7 @@ class PostManager(models.Manager):
             is_published=True,
             category__is_published=True,
             pub_date__lte=datetime.datetime.now(),
-          ).annotate(comment_count=models.Count('comments'))
+        ).annotate(comment_count=models.Count('comments'))
 
 
 class Category(PublishedModel):
@@ -53,7 +53,7 @@ class Post(PublishedModel):
     image = models.ImageField(
         'Картинка публикации',
         blank=True,
-        )
+    )
     pub_date = models.DateTimeField(
         'Дата и время публикации',
         help_text='Если установить дату и время в будущем — '
@@ -108,7 +108,7 @@ class Comment(models.Model):
         User,
         on_delete=models.CASCADE,
         related_name='comments',
-        )
+    )
 
     class Meta:
         ordering = ('created_at',)

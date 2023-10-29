@@ -9,7 +9,7 @@ User = get_user_model()
 
 
 class PostForm(forms.ModelForm):
-    """ Форма публикации """
+    """Форма публикации"""
 
     class Meta:
         model = Post
@@ -17,7 +17,7 @@ class PostForm(forms.ModelForm):
         widgets = {'pub_date': forms.DateInput(
             format='%%d-%m-%Y %H:%M',
             attrs={'type': 'datetime-local'},
-            ),
+        ),
         }
 
     def clean(self):
@@ -36,13 +36,16 @@ class CustomUserCreationForm(UserCreationForm):
 
 
 class CommentForm(forms.ModelForm):
-    """ Форма добавления комментария """
+    """Форма добавления комментария"""
+
     class Meta:
         model = Comment
         fields = ('text',)
 
 
 class EditUserForm(forms.ModelForm):
+    """Форма редактирования профиля"""
+
     class Meta:
         model = User
         fields = (
