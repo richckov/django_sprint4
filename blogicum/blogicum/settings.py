@@ -1,6 +1,4 @@
 from pathlib import Path
-# import os
-
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -41,6 +39,8 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'blogicum.urls'
+
+TEMPLATES_DIR = BASE_DIR / 'templates'
 
 TEMPLATES = [
     {
@@ -118,3 +118,7 @@ EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
 EMAIL_FILE_PATH = BASE_DIR / 'sent_emails/'
 
 # EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'sent_emails')
+
+# TEMPLATE_DIRS = (
+#     'blogicum/templates/',
+# )

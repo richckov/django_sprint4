@@ -1,10 +1,9 @@
 import datetime
 
+from core.models import PublishedModel
 from django.contrib.auth import get_user_model
 from django.db import models
 from django.db.models.query import QuerySet
-
-from core.models import PublishedModel
 from django.urls import reverse
 
 User = get_user_model()
@@ -51,7 +50,10 @@ class Location(PublishedModel):
 class Post(PublishedModel):
     title = models.CharField('Заголовок', max_length=256)
     text = models.TextField('Текст')
-    image = models.ImageField('Картинка публикации', blank=True)
+    image = models.ImageField(
+        'Картинка публикации',
+        blank=True,
+        )
     pub_date = models.DateTimeField(
         'Дата и время публикации',
         help_text='Если установить дату и время в будущем — '
@@ -110,3 +112,5 @@ class Comment(models.Model):
 
     class Meta:
         ordering = ('created_at',)
+        verbose_name = 'Комментарий'
+        verbose_name_plural = 'Комментарии'

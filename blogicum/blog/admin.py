@@ -2,8 +2,6 @@ from django.contrib import admin
 
 from .models import Category, Location, Post
 
-# from django.utils.safestring import mark_safe
-
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
@@ -22,7 +20,6 @@ class CategoryAdmin(admin.ModelAdmin):
         'title',
         'category',
     )
-    # list_filter = ('category',)
     list_display_links = ('title',)
     empty_value_display = 'Не задано'
 

@@ -1,9 +1,9 @@
-from .models import Post, Comment
 from django import forms
-from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import get_user_model
+from django.contrib.auth.forms import UserCreationForm
 from django.core.mail import send_mail
 
+from .models import Comment, Post
 
 User = get_user_model()
 
@@ -45,11 +45,7 @@ class CommentForm(forms.ModelForm):
 class EditUserForm(forms.ModelForm):
     class Meta:
         model = User
-        exclude = (
-            # 'password',
-            'last_login',
-            # 'id_superuser',
-            'is_staff',
-            'is_active',
-            # 'data_joined',
-            )
+        fields = (
+            'first_name',
+            'last_name',
+        )
