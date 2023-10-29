@@ -16,7 +16,7 @@ urlpatterns = [
         success_url=reverse_lazy('blog:index'),
     ),
         name='registration'),
-    ]
+]
 
 handler404 = 'pages.views.page_not_found'
 handler500 = 'pages.views.something_wrong_with_server'
