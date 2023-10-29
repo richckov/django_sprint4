@@ -1,11 +1,10 @@
 import datetime
 
-from core.mixins import AuthorshipMixin, ScuccesUrlPostDetail
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Count
 from django.http import Http404
 from django.shortcuts import get_object_or_404
-from django.urls import reverse, reverse_lazy
+from django.urls import reverse
 from django.utils import timezone
 from django.views.generic import (CreateView, DeleteView, DetailView, ListView,
                                   UpdateView)
@@ -13,18 +12,8 @@ from django.views.generic import (CreateView, DeleteView, DetailView, ListView,
 from .constants import POSTS_IN_PAGE
 from .forms import CommentForm, EditUserForm, PostForm
 from .models import Category, Comment, Post, User
-
-
-def get_some_queryset():
-    return Post.objects.select_related(
-        'author',
-        'location',
-        'category',
-    ).filter(
-        is_published=True,
-        category__is_published=True,
-        pub_date__lte=datetime.datetime.now(),
-    ).annotate(comment_count=Count('comments')).order_by('-pub_date')
+from core.mixins import (AuthorshipMixin, SuccessUrlPostDetail,
+                         SuccessUrlProfile)
 
 
 class IndexListView(ListView):
@@ -42,11 +31,18 @@ class CategoryListView(ListView):
     paginate_by = POSTS_IN_PAGE
     template_name = 'blog/category.html'
 
-    def get_context_data(self, *args, **kwargs):
-        context = super().get_context_data(*args, **kwargs)
-        slug = get_object_or_404(Category, slug=self.kwargs['category_slug'])
-        context['category'] = slug
-        return context
+    def get_context_data(self, **kwargs):
+        # context = super().get_context_data(*args, **kwargs)
+        # slug = get_object_or_404(Category, slug=self.kwargs['category_slug'])
+        # context['category'] = slug
+        # return context
+        return dict(
+            **super().get_context_data(**kwargs),
+            category=get_object_or_404(
+                Category,
+                slug=self.kwargs['category_slug'],
+            ),
+        )
 
     def get_queryset(self):
         category = get_object_or_404(
@@ -55,13 +51,14 @@ class CategoryListView(ListView):
                 slug=self.kwargs['category_slug'],
             )
         )
-        return category.posts.filter(
+
+        return category.posts(manager='active_objects').filter(
             is_published=True,
             pub_date__lte=datetime.datetime.now(),
         ).order_by('-pub_date').annotate(comment_count=Count('comments'))
 
 
-class PostCreateView(LoginRequiredMixin, CreateView):
+class PostCreateView(LoginRequiredMixin, SuccessUrlProfile, CreateView):
     """Страница создания публикации"""
 
     model = Post
@@ -71,12 +68,6 @@ class PostCreateView(LoginRequiredMixin, CreateView):
     def form_valid(self, form):
         form.instance.author = self.request.user
         return super().form_valid(form)
-
-    def get_success_url(self):
-        return reverse(
-            'blog:profile',
-            kwargs={'username': self.object.author},
-        )
 
 
 class ProfileListView(ListView):
@@ -94,11 +85,13 @@ class ProfileListView(ListView):
             return Post.objects.select_related(
                 'category',
                 'location',
-                'author'
+                'author',
             ).filter(
                 author=self.user
             ).annotate(comment_count=Count('comments')).order_by('-pub_date')
-        return get_some_queryset().filter(author=self.user)
+        return Post.active_objects.filter(author=self.user).order_by(
+            '-pub_date',
+        )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -160,7 +153,7 @@ class CommentCreateView(LoginRequiredMixin, CreateView):
                        kwargs={'post_id': self.id_post_comment.pk})
 
 
-class CommentUpdateView(AuthorshipMixin, ScuccesUrlPostDetail, UpdateView):
+class CommentUpdateView(AuthorshipMixin, SuccessUrlPostDetail, UpdateView):
     """Страница редактирования комментария"""
 
     form_class = CommentForm
@@ -192,7 +185,7 @@ class PostUpdateView(AuthorshipMixin, UpdateView):
         )
 
 
-class ProfileUpdateView(LoginRequiredMixin, UpdateView):
+class ProfileUpdateView(LoginRequiredMixin, SuccessUrlProfile, UpdateView):
     """Страница редактирования профиля"""
 
     queryset = Post.objects.select_related()
@@ -202,13 +195,8 @@ class ProfileUpdateView(LoginRequiredMixin, UpdateView):
     def get_object(self):
         return self.request.user
 
-    def get_success_url(self):
-        return reverse_lazy(
-            'blog:profile', kwargs={'username': self.request.user}
-        )
 
-
-class PostDeleteView(AuthorshipMixin, DeleteView):
+class PostDeleteView(AuthorshipMixin, SuccessUrlProfile, DeleteView):
     """Страница удаления поста"""
 
     model = Post
@@ -220,13 +208,8 @@ class PostDeleteView(AuthorshipMixin, DeleteView):
         context['form'] = PostForm(instance=self.object)
         return context
 
-    def get_success_url(self):
-        return reverse_lazy(
-            'blog:profile', kwargs={'username': self.request.user}
-        )
 
-
-class CommentDeleteView(AuthorshipMixin, ScuccesUrlPostDetail, DeleteView):
+class CommentDeleteView(AuthorshipMixin, SuccessUrlPostDetail, DeleteView):
     """Страница удаления комментария"""
 
     model = Comment

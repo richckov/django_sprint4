@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Category, Location, Post
+from .models import Category, Comment, Location, Post
 
 
 @admin.register(Category)
@@ -12,11 +12,8 @@ class CategoryAdmin(admin.ModelAdmin):
         'is_published',
         'created_at',
     )
-    list_editable = (
-        # 'is_published',
-        # 'category',
-    )
-    search_fields = (
+
+    earch_fields = (
         'title',
         'category',
     )
@@ -44,7 +41,6 @@ class PostAdmin(admin.ModelAdmin):
         'location',
         'category',
         'image',
-        # 'small_image',
     )
     list_editable = (
         'category',
@@ -54,8 +50,12 @@ class PostAdmin(admin.ModelAdmin):
     list_display_links = ('title',)
     empty_value_display = 'Не задано'
 
-    # @admin.display(description='Картинка')
-    # def small_img(self, obj):
-    #     if obj.image:
-    #         return mark_safe(f
-    # '<img scr={obj.image.url} width="80" height="60">')
+
+@admin.register(Comment)
+class CommentAdmin(admin.ModelAdmin):
+    list_display = (
+        'text',
+        'post',
+        'created_at',
+        'author',
+        )

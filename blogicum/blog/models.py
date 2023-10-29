@@ -11,11 +11,15 @@ User = get_user_model()
 
 class PostManager(models.Manager):
     def get_queryset(self) -> QuerySet:
-        return super().get_queryset().filter(
+        return Post.objects.select_related(
+            'author',
+            'location',
+            'category',
+            ).filter(
             is_published=True,
             category__is_published=True,
             pub_date__lte=datetime.datetime.now(),
-        ).annotate(comment_count=models.Count('comments'))
+            ).annotate(comment_count=models.Count('comments'))
 
 
 class Category(PublishedModel):
