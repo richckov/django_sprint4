@@ -58,4 +58,4 @@ class CommentAdmin(admin.ModelAdmin):
         'post',
         'created_at',
         'author',
-        )
+    )

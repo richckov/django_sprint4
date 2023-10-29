@@ -15,11 +15,11 @@ class PostManager(models.Manager):
             'author',
             'location',
             'category',
-            ).filter(
-            is_published=True,
+        ).filter(
+            s_published=True,
             category__is_published=True,
             pub_date__lte=datetime.datetime.now(),
-            ).annotate(comment_count=models.Count('comments'))
+        ).annotate(comment_count=models.Count('comments'))
 
 
 class Category(PublishedModel):
