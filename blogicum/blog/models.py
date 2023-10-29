@@ -16,7 +16,7 @@ class PostManager(models.Manager):
             'location',
             'category',
         ).filter(
-            s_published=True,
+            is_published=True,
             category__is_published=True,
             pub_date__lte=datetime.datetime.now(),
         ).annotate(comment_count=models.Count('comments'))
