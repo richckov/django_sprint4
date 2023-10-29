@@ -2,10 +2,9 @@ import datetime
 
 from core.mixins import AuthorshipMixin, ScuccesUrlPostDetail
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.core.paginator import Paginator
 from django.db.models import Count
 from django.http import Http404
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.views.generic import (CreateView, DeleteView, DetailView, ListView,
@@ -18,18 +17,19 @@ from .models import Category, Comment, Post, User
 
 def get_some_queryset():
     return Post.objects.select_related(
-            'author',
-            'location',
-            'category'
-        ).filter(
-            is_published=True,
-            category__is_published=True,
-            pub_date__lte=datetime.datetime.now()
-        ).annotate(comment_count=Count('comments')).order_by('-pub_date')
+        'author',
+        'location',
+        'category',
+    ).filter(
+        is_published=True,
+        category__is_published=True,
+        pub_date__lte=datetime.datetime.now(),
+    ).annotate(comment_count=Count('comments')).order_by('-pub_date')
 
 
 class IndexListView(ListView):
-    """ Главная страница """
+    """Главная страница"""
+
     template_name = 'blog/index.html'
     paginate_by = POSTS_IN_PAGE
     queryset = Post.active_objects.all()
@@ -37,7 +37,8 @@ class IndexListView(ListView):
 
 
 class CategoryListView(ListView):
-    """ Страница категорий """
+    """Страница категорий"""
+
     paginate_by = POSTS_IN_PAGE
     template_name = 'blog/category.html'
 
@@ -57,10 +58,12 @@ class CategoryListView(ListView):
         return category.posts.filter(
             is_published=True,
             pub_date__lte=datetime.datetime.now(),
-            ).order_by('-pub_date').annotate(comment_count=Count('comments'))
+        ).order_by('-pub_date').annotate(comment_count=Count('comments'))
 
 
 class PostCreateView(LoginRequiredMixin, CreateView):
+    """Страница создания публикации"""
+
     model = Post
     form_class = PostForm
     template_name = 'blog/create.html'
@@ -76,24 +79,9 @@ class PostCreateView(LoginRequiredMixin, CreateView):
         )
 
 
-def profile(request, username):
-    """ Страница пользователя """
-    user = get_object_or_404(User.objects.filter(username=username))
-    posts = Post.objects.filter(
-        author_id=user.id,).order_by('-pub_date').annotate(
-            comment_count=Count('comments'),
-            )
-    paginator = Paginator(posts, POSTS_IN_PAGE)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-    context = {
-        'page_obj': page_obj,
-        'profile': user,
-        }
-    return render(request, 'blog/profile.html', context)
-
-
 class ProfileListView(ListView):
+    """Страница пользователя"""
+
     model = Post
     template_name = 'blog/profile.html'
     slug_url_kwarg = 'username'
@@ -119,7 +107,8 @@ class ProfileListView(ListView):
 
 
 class PostDetailView(DetailView):
-    """ Страница поста """
+    """Страница поста"""
+
     model = Post
     template_name = 'blog/detail.html'
     pk_url_kwarg = 'post_id'
@@ -151,6 +140,8 @@ class PostDetailView(DetailView):
 
 
 class CommentCreateView(LoginRequiredMixin, CreateView):
+    """Страница создания комментария"""
+
     model = Comment
     form_class = CommentForm
     template_name = 'blog/comment.html'
@@ -170,6 +161,8 @@ class CommentCreateView(LoginRequiredMixin, CreateView):
 
 
 class CommentUpdateView(AuthorshipMixin, ScuccesUrlPostDetail, UpdateView):
+    """Страница редактирования комментария"""
+
     form_class = CommentForm
     model = Comment
     template_name = 'blog/comment.html'
@@ -185,6 +178,8 @@ class CommentUpdateView(AuthorshipMixin, ScuccesUrlPostDetail, UpdateView):
 
 
 class PostUpdateView(AuthorshipMixin, UpdateView):
+    """Страница редактирования поста"""
+
     model = Post
     form_class = PostForm
     pk_url_kwarg = 'post_id'
@@ -197,7 +192,9 @@ class PostUpdateView(AuthorshipMixin, UpdateView):
         )
 
 
-class UpdateProfile(LoginRequiredMixin, UpdateView):
+class ProfileUpdateView(LoginRequiredMixin, UpdateView):
+    """Страница редактирования профиля"""
+
     queryset = Post.objects.select_related()
     form_class = EditUserForm
     template_name = 'blog/user.html'
@@ -212,6 +209,8 @@ class UpdateProfile(LoginRequiredMixin, UpdateView):
 
 
 class PostDeleteView(AuthorshipMixin, DeleteView):
+    """Страница удаления поста"""
+
     model = Post
     template_name = 'blog/create.html'
     pk_url_kwarg = 'post_id'
@@ -228,6 +227,8 @@ class PostDeleteView(AuthorshipMixin, DeleteView):
 
 
 class CommentDeleteView(AuthorshipMixin, ScuccesUrlPostDetail, DeleteView):
+    """Страница удаления комментария"""
+
     model = Comment
     template_name = 'blog/comment.html'
     pk_url_kwarg = 'comment_id'

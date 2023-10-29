@@ -11,7 +11,7 @@ class PublishedModel(models.Model):
         'Добавлено',
         auto_now_add=True,
         null=True,
-        )
+    )
 
     class Meta:
         abstract = True
